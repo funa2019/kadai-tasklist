@@ -15,13 +15,26 @@ class TasksController extends Controller
      */
     public function index()
     {
+      $data = [];
+        if (\Auth::check()) {
+            $user = \Auth::user();
+            $tasks = $user->tasks()->orderBy('created_at', 'desc')->paginate(10);
+            
+            $data = [
+                'user' => $user,
+                'tasks' => $tasks,
+            ];
+        }
+        return view('welcome', $data);
+    }     
+    /*
         $tasks = Task::all();
 
         return view('tasks.index', [
             'tasks' => $tasks,
-        ]);
-    }
-
+             ]);
+    */
+  
     /**
      * Show the form for creating a new resource.
      *
@@ -49,14 +62,19 @@ class TasksController extends Controller
             'content' => 'required|max:191',
         ]);
         
+           $request->user()->tasks()->create([
+           'status' => $request->status,
+           'content' => $request->content,
+        ]);
+         return redirect('/');
+    }
+    
+    /*        
         $task = new Task;
         $task->status = $request->status;
         $task->content = $request->content;
         $task->save();
-
-        return redirect('/');
-    }
-
+    */
     /**
      * Display the specified resource.
      *
@@ -65,13 +83,16 @@ class TasksController extends Controller
      */
     public function show($id)
     {
-         $task = Task::find($id);
-
-        return view('tasks.show', [
-            'task' => $task,
-        ]);
+        
+            $task = Task::find($id);
+            
+            return view('tasks.show', [
+                'task' => $task,
+            ]);
+      
+        return redirect('/');
     }
-
+    
     /**
      * Show the form for editing the specified resource.
      *
@@ -80,13 +101,15 @@ class TasksController extends Controller
      */
     public function edit($id)
     {
-         $task = Task::find($id);
-
-        return view('tasks.edit', [
-            'task' => $task,
-        ]);
+         
+            $task = Task::find($id);
+            return view('tasks.edit', [
+                'task' => $task,
+            ]);
+       
+          return redirect('/');
     }
-
+    
     /**
      * Update the specified resource in storage.
      *
@@ -96,19 +119,20 @@ class TasksController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $this->validate($request, [
-            'status' => 'required|max:10', 
-            'content' => 'required|max:191',
-        ]);
+        
+            $this->validate($request, [
+                'status' => 'required|max:10', 
+                'content' => 'required|max:191',
+            ]);
        
-        $task = Task::find($id);
-        $task->status = $request->status;
-        $task->content = $request->content;
-        $task->save();
-
+            $task = Task::find($id);
+            $task->status = $request->status;
+            $task->content = $request->content;
+            $task->save();
+       
         return redirect('/');
     }
-
+    
     /**
      * Remove the specified resource from storage.
      *
@@ -117,9 +141,10 @@ class TasksController extends Controller
      */
     public function destroy($id)
     {
-        $task = Task::find($id);
-        $task->delete();
-
+       
+            $task = Task::find($id);
+            $task->delete();
+       
         return redirect('/');
     }
 }
